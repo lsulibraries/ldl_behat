@@ -1,3 +1,4 @@
+@javascript
 @api
 Feature: Drush driver
   In order to show functionality added by the Drush driver 

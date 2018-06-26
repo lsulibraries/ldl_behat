@@ -1,3 +1,4 @@
+@javascript
 @api
 Feature: API example
   In order to show functionality added by the api
