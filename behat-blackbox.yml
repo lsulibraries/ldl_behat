@@ -16,8 +16,3 @@ default:
       base_url: http://130.39.60.175:8000
     Drupal\DrupalExtension:
       blackbox: ~
-      api_driver: 'drupal'
-      drush:
-        root: '/var/www/ldl'
-      drupal:
-        drupal_root: '/var/www/ldl'
