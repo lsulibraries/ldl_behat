@@ -99,6 +99,7 @@ class FeatureContext extends FeatureContextBase implements SnippetAcceptingConte
   public static function deleteCollection($pid) {
     $object = islandora_object_load($pid);
     if ($object) {
+      module_load_include('inc', 'islandora_solution_pack_collection', 'includes/batch');
       batch_set(islandora_basic_collection_delete_children_batch($object));
       islandora_delete_object($object);
     }
