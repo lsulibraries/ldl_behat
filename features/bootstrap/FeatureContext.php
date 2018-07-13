@@ -1,5 +1,6 @@
 <?php
 
+// require_once 'FeatureContextBase.php';
 use Drupal\DrupalExtension\Context\RawDrupalContext;
 use Drupal\DrupalExtension\Context\DrushContext;
 use Drupal\DrupalUserManager;
@@ -14,7 +15,7 @@ use IslandoraApi\Util;
 /**
  * Defines application features from the specific context.
  */
-class FeatureContext extends RawDrupalContext implements SnippetAcceptingContext {
+class FeatureContext extends FeatureContextBase implements SnippetAcceptingContext {
 
   /**
    * Initializes context.
@@ -28,94 +29,6 @@ class FeatureContext extends RawDrupalContext implements SnippetAcceptingContext
 
 
   static $baseCollection = 'testing-testing-123:collection';
-  /**
-   *
-   * @Given I am viewing pid :pid
-   * @Then I view pid :pid
-   */
-  public function iVisitPid($pid) {
-    $path = '/islandora/object/' . $pid;
-    $this->getSession()->visit($this->locatePath($path));
-  }
-
-  /**
-   * Click on the element with the provided xpath query
-   *
-   * Posted by Abu Ashraf Masnun, retrieved 2018-06-27
-   * http://masnun.com/2012/11/28/behat-and-mink-finding-and-clicking-with-xpath-and-jquery-like-css-selector.html
-   * @When /^I click on the element with xpath "([^"]*)"$/
-   */
-  public function iClickOnTheElementWithXPath($xpath) {
-    // Get the mink session.
-    $session = $this->getSession();
-    // Runs the actual query and returns the element.
-    $element = $session->getPage()->find(
-        'xpath',
-        $session->getSelectorsHandler()->selectorToXpath('xpath', $xpath)
-    );
-    // Errors must not pass silently.
-    if (NULL === $element) {
-      throw new \InvalidArgumentException(sprintf('Could not evaluate XPath: "%s"', $xpath));
-    }
-
-    // Ok, let's click on it.
-    $element->click();
-  }
-
-  /**
-   * Find whether an xpath exists in the page.
-   *
-   * Adapted from code posted by Abu Ashraf Masnun, retrieved 2018-06-27
-   * http://masnun.com/2012/11/28/behat-and-mink-finding-and-clicking-with-xpath-and-jquery-like-css-selector.html
-   *
-   * @When /^I should find xpath "([^"]*)"$/
-   */
-  public function iShouldFindXPath($xpath) {
-
-    // Errors must not pass silently.
-    if (!$this->xpathExists($xpath)) {
-      throw new \InvalidArgumentException(sprintf('Could not evaluate XPath: "%s"', $xpath));
-    }
-  }
-
-  /**
-   * Find whether an xpath exists in the page.
-   *
-   * Adapted from code posted by Abu Ashraf Masnun, retrieved 2018-06-27
-   * http://masnun.com/2012/11/28/behat-and-mink-finding-and-clicking-with-xpath-and-jquery-like-css-selector.html
-   *
-   * @When /^I should not find xpath "([^"]*)"$/
-   */
-  public function iShouldNotFindXPath($xpath) {
-
-    // Errors must not pass silently.
-    if ($this->xpathExists($xpath)) {
-      throw new \InvalidArgumentException(sprintf('Could not evaluate XPath: "%s"', $xpath));
-    }
-  }
-
-  /**
-   * Helper fn for xpath exists.
-   *
-   * Adapted from code posted by Abu Ashraf Masnun, retrieved 2018-06-27
-   * http://masnun.com/2012/11/28/behat-and-mink-finding-and-clicking-with-xpath-and-jquery-like-css-selector.html
-   *
-   * @param string $xpath
-   *   xpath to find
-   */
-  public function xpathExists($xpath) {
-    // Get the mink session.
-    $session = $this->getSession();
-    // Runs the actual query and returns the element.
-    $element = $session->getPage()->find(
-        'xpath',
-        $session->getSelectorsHandler()->selectorToXpath('xpath', $xpath)
-    );
-    if (NULL === $element) {
-      return FALSE;
-    }
-    return TRUE;
-  }
 
   /**
   * @Given I create a new collection :pid
@@ -144,17 +57,6 @@ class FeatureContext extends RawDrupalContext implements SnippetAcceptingContext
       $this->getSession()->visit($this->locatePath($path));
   }
 
-  
-  /**
-   * @Given /^breakpoint$/
-   */
-  public function breakpoint() {
-    fwrite(STDOUT, "\033[s \033[93m[Breakpoint] Press \033[1;93m[RETURN]\033[0;93m to continue...\033[0m");
-    while (fgets(STDIN, 1024) == '') {}
-    fwrite(STDOUT, "\033[u");
-    return;
-  }
-
   /**
    * @BeforeSuite
    */
@@ -168,21 +70,21 @@ class FeatureContext extends RawDrupalContext implements SnippetAcceptingContext
    * @AfterSuite
    */
   public static function teardown() {
-    global $user; 
-    $original_user = $user; 
-    $old_state = drupal_save_session(); 
-    drupal_save_session(FALSE); 
+    global $user;
+    $original_user = $user;
+    $old_state = drupal_save_session();
+    drupal_save_session(FALSE);
     $user = $behat = user_load_by_name('behat');
 
     self::deleteCollection(self::$baseCollection);
-    $user = $original_user; 
-    drupal_save_session($old_state); 
+    $user = $original_user;
+    drupal_save_session($old_state);
 
     if($behat) {
       user_delete($behat->uid);
     }
   }
-  
+
   static function createCollection($user, \stdClass $collection = NULL) {
     module_load_include('inc', 'islandora_utils', 'includes/util');
     if (!$collection) {
@@ -201,7 +103,7 @@ class FeatureContext extends RawDrupalContext implements SnippetAcceptingContext
       islandora_delete_object($object);
     }
   }
-  
+
   public static function getAdminUser() {
     $user_exists = user_load_by_name('behat');
     if ($user_exists) {
@@ -263,7 +165,7 @@ class FeatureContext extends RawDrupalContext implements SnippetAcceptingContext
       <coordinates></coordinates>
     </cartographics>
   </subject>
-</mods> 
+</mods>
 EOF;
   file_put_contents('/tmp/mods.xml', $mods);
   }
